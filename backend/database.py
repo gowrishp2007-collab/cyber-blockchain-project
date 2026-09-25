@@ -33,41 +33,17 @@ DATABASE_URL = os.getenv(
 SUPABASE_PROJECT_REF = "rfbmuteinautlzzswmqy"
 
 if "pooler.supabase.com" in DATABASE_URL:
-    try:
-        parsed = urlsplit(DATABASE_URL)
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgresql+psycopg://postgres:",
+        f"postgresql+psycopg2://postgres.{SUPABASE_PROJECT_REF}:",
+        1
+    )
 
-        username = parsed.username
-        password = parsed.password
-
-        # Supabase Transaction/Session Pooler username
-        if username == "postgres":
-            username = f"postgres.{SUPABASE_PROJECT_REF}"
-
-        # Rebuild the database URL safely
-        if username and password is not None:
-            userinfo = f"{username}:{password}"
-            netloc = f"{userinfo}@{parsed.hostname}"
-
-            if parsed.port:
-                netloc += f":{parsed.port}"
-
-            DATABASE_URL = urlunsplit((
-                parsed.scheme,
-                netloc,
-                parsed.path,
-                parsed.query,
-                parsed.fragment,
-            ))
-
-        # Use psycopg2 driver for SQLAlchemy
-        DATABASE_URL = DATABASE_URL.replace(
-            "postgresql+psycopg://",
-            "postgresql+psycopg2://",
-            1
-        )
-
-    except Exception:
-        pass
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgresql://postgres:",
+        f"postgresql+psycopg2://postgres.{SUPABASE_PROJECT_REF}:",
+        1
+    )
 
 
 # ============================================================
