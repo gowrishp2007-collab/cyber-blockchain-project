@@ -33,6 +33,8 @@ DATABASE_URL = os.getenv(
 SUPABASE_PROJECT_REF = "rfbmuteinautlzzswmqy"
 
 if "pooler.supabase.com" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
     DATABASE_URL = DATABASE_URL.replace(
         "postgresql+psycopg://postgres:",
         f"postgresql+psycopg2://postgres.{SUPABASE_PROJECT_REF}:",
