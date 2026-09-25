@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 from dotenv import load_dotenv
 from sqlalchemy import Column, DateTime, Integer, String, create_engine
@@ -12,7 +13,6 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 # ============================================================
 
 ENV_FILE = Path(__file__).resolve().parent / ".env"
-
 load_dotenv(ENV_FILE)
 
 
@@ -25,18 +25,49 @@ DATABASE_URL = os.getenv(
     "sqlite:///./cyber_threats.db"
 )
 
-# Supabase Transaction Pooler:
-# If the URL uses the plain "postgres" username,
-# convert it to the project-specific pooler username.
-if (
-    "pooler.supabase.com" in DATABASE_URL
-    and DATABASE_URL.startswith("postgresql")
-):
-    DATABASE_URL = DATABASE_URL.replace(
-        "://postgres:",
-        "://postgres.rfbmuteinautlzzswmqy:",
-        1
-    )
+
+# ============================================================
+# SUPABASE POOLER URL FIX
+# ============================================================
+
+SUPABASE_PROJECT_REF = "rfbmuteinautlzzswmqy"
+
+if "pooler.supabase.com" in DATABASE_URL:
+    try:
+        parsed = urlsplit(DATABASE_URL)
+
+        username = parsed.username
+        password = parsed.password
+
+        # Supabase Transaction/Session Pooler username
+        if username == "postgres":
+            username = f"postgres.{SUPABASE_PROJECT_REF}"
+
+        # Rebuild the database URL safely
+        if username and password is not None:
+            userinfo = f"{username}:{password}"
+            netloc = f"{userinfo}@{parsed.hostname}"
+
+            if parsed.port:
+                netloc += f":{parsed.port}"
+
+            DATABASE_URL = urlunsplit((
+                parsed.scheme,
+                netloc,
+                parsed.path,
+                parsed.query,
+                parsed.fragment,
+            ))
+
+        # Use psycopg2 driver for SQLAlchemy
+        DATABASE_URL = DATABASE_URL.replace(
+            "postgresql+psycopg://",
+            "postgresql+psycopg2://",
+            1
+        )
+
+    except Exception:
+        pass
 
 
 # ============================================================
