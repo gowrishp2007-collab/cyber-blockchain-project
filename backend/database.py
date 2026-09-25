@@ -1,10 +1,10 @@
 from datetime import datetime
 import os
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit
 
 from dotenv import load_dotenv
 from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 
@@ -27,25 +27,44 @@ DATABASE_URL = os.getenv(
 
 
 # ============================================================
-# SUPABASE POOLER URL FIX
+# SUPABASE DATABASE URL NORMALIZATION
 # ============================================================
 
 SUPABASE_PROJECT_REF = "rfbmuteinautlzzswmqy"
 
-if "pooler.supabase.com" in DATABASE_URL:
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+try:
+    # Remove accidental spaces/quotes from the environment value.
+    DATABASE_URL = DATABASE_URL.strip().strip('"').strip("'")
 
-    DATABASE_URL = DATABASE_URL.replace(
-        "postgresql+psycopg://postgres:",
-        f"postgresql+psycopg2://postgres.{SUPABASE_PROJECT_REF}:",
-        1
+    db_url = make_url(DATABASE_URL)
+
+    # Shared Supabase pooler uses:
+    # postgres.<PROJECT-REF>
+    if (
+        db_url.host
+        and "pooler.supabase.com" in db_url.host
+        and db_url.username == "postgres"
+    ):
+        db_url = db_url.set(
+            username=f"postgres.{SUPABASE_PROJECT_REF}"
+        )
+
+    # Use psycopg2 explicitly for SQLAlchemy.
+    if db_url.drivername in (
+        "postgresql",
+        "postgres",
+        "postgresql+psycopg",
+    ):
+        db_url = db_url.set(
+            drivername="postgresql+psycopg2"
+        )
+
+    DATABASE_URL = db_url.render_as_string(
+        hide_password=False
     )
 
-    DATABASE_URL = DATABASE_URL.replace(
-        "postgresql://postgres:",
-        f"postgresql+psycopg2://postgres.{SUPABASE_PROJECT_REF}:",
-        1
-    )
+except Exception:
+    pass
 
 
 # ============================================================
