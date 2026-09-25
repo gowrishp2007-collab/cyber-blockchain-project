@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cyber Threat Intelligence Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div>
+            <p class="eyebrow">BLOCKCHAIN CYBERSECURITY</p>
+            <h1>Cyber Threat Intelligence Dashboard</h1>
+            <p class="subtitle">
+                Analyze threats, store evidence securely, record hashes on blockchain,
+                and verify evidence integrity.
+            </p>
+        </div>
+
+        <div class="server-status">
+            <span class="status-dot"></span>
+            <span id="serverStatus">Checking API...</span>
+        </div>
+    </header>
+
+
+    <main class="container">
+
+        <!-- =====================================================
+             SUMMARY CARDS
+        ====================================================== -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span>Total Threats</span>
+                <strong id="totalThreats">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>High Risk Threats</span>
+                <strong id="highRiskThreats">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Open Incidents</span>
+                <strong id="openIncidents">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Resolved Incidents</span>
+                <strong id="resolvedIncidents">0</strong>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             THREAT ANALYSIS
+        ====================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">THREAT ANALYSIS</p>
+                    <h2>Analyze a Cyber Threat</h2>
+                </div>
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="threatType">Threat Type</label>
+
+                    <select id="threatType">
+                        <option value="ip">IP Address</option>
+                        <option value="url">URL</option>
+                        <option value="hash">File Hash</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="threatValue">Threat Value</label>
+
+                    <input
+                        type="text"
+                        id="threatValue"
+                        placeholder="Enter IP, URL or file hash"
+                    >
+                </div>
+
+            </div>
+
+
+            <button
+                class="primary-btn"
+                onclick="analyzeThreat()"
+            >
+                Analyze & Record Threat
+            </button>
+
+
+            <div
+                id="threatResult"
+                class="result-box hidden"
+            ></div>
+
+        </section>
+
+
+        <!-- =====================================================
+             VERIFICATION
+        ====================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">BLOCKCHAIN VERIFICATION</p>
+                    <h2>Verify Evidence Integrity</h2>
+                </div>
+            </div>
+
+
+            <div class="verify-row">
+
+                <input
+                    type="number"
+                    id="verifyThreatId"
+                    min="1"
+                    placeholder="Enter Threat ID"
+                >
+
+                <button
+                    class="secondary-btn"
+                    onclick="verifyThreat()"
+                >
+                    Verify
+                </button>
+
+            </div>
+
+
+            <div
+                id="verifyResult"
+                class="result-box hidden"
+            ></div>
+
+        </section>
+
+
+        <!-- =====================================================
+             THREAT TYPES + RISK LEVELS
+        ====================================================== -->
+
+        <section class="two-column">
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <p class="section-label">THREAT DISTRIBUTION</p>
+                        <h2>Threat Types</h2>
+                    </div>
+                </div>
+
+                <div id="threatTypes"></div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <p class="section-label">RISK DISTRIBUTION</p>
+                        <h2>Risk Levels</h2>
+                    </div>
+                </div>
+
+                <div id="riskLevels"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             THREAT TRENDS
+        ====================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">THREAT TRENDS</p>
+                    <h2>Daily Threat Activity</h2>
+                </div>
+            </div>
+
+            <div id="trends"></div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RECENT ATTACKS
+        ====================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">RECENT ATTACKS</p>
+                    <h2>Latest Threat Records</h2>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Risk</th>
+                            <th>Status</th>
+                            <th>Blockchain TX</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="recentAttacksBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             INCIDENT MANAGEMENT
+        ====================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">INCIDENT MANAGEMENT</p>
+                    <h2>Security Incidents</h2>
+                </div>
+
+                <button
+                    class="secondary-btn"
+                    onclick="loadIncidents()"
+                >
+                    Refresh
+                </button>
+            </div>
+
+
+            <div class="incident-create">
+
+                <input
+                    type="number"
+                    id="incidentThreatId"
+                    min="1"
+                    placeholder="Threat ID"
+                >
+
+                <button
+                    class="primary-btn"
+                    onclick="createIncident()"
+                >
+                    Create Incident
+                </button>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Incident ID</th>
+                            <th>Threat ID</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Resolved</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="incidentsBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SYSTEM ARCHITECTURE
+        ====================================================== -->
+
+        <section class="panel architecture">
+
+            <div class="panel-header">
+                <div>
+                    <p class="section-label">SYSTEM FLOW</p>
+                    <h2>How the Platform Works</h2>
+                </div>
+            </div>
+
+
+            <div class="flow">
+
+                <div class="flow-item">
+                    <strong>Threat</strong>
+                    <span>IP / URL / Hash</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-item">
+                    <strong>Analysis</strong>
+                    <span>Risk Classification</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-item">
+                    <strong>SHA-256</strong>
+                    <span>Evidence Fingerprint</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-item">
+                    <strong>Blockchain</strong>
+                    <span>Immutable Record</span>
+                </div>
+
+                <div class="arrow">→</div>
+
+                <div class="flow-item">
+                    <strong>Verify</strong>
+                    <span>Authentic / Tampered</span>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        Cyber Threat Intelligence & Blockchain Security Project
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
