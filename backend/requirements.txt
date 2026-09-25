@@ -5,4 +5,4 @@ requests
 python-dotenv
 sqlalchemy
 psycopg2-binary
-py-solc-x
+py-solc-xpsycopg[binary]
