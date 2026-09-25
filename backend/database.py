@@ -25,6 +25,19 @@ DATABASE_URL = os.getenv(
     "sqlite:///./cyber_threats.db"
 )
 
+# Supabase Transaction Pooler:
+# If the URL uses the plain "postgres" username,
+# convert it to the project-specific pooler username.
+if (
+    "pooler.supabase.com" in DATABASE_URL
+    and DATABASE_URL.startswith("postgresql")
+):
+    DATABASE_URL = DATABASE_URL.replace(
+        "://postgres:",
+        "://postgres.rfbmuteinautlzzswmqy:",
+        1
+    )
+
 
 # ============================================================
 # DATABASE ENGINE
