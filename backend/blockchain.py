@@ -1,4 +1,5 @@
 import hashlib
+import os
 from pathlib import Path
 
 from solcx import compile_source, set_solc_version
@@ -9,7 +10,10 @@ from web3 import Web3
 # GANACHE CONNECTION
 # ============================================================
 
-GANACHE_URL = "http://127.0.0.1:8545"
+GANACHE_URL = os.getenv(
+    "GANACHE_URL",
+    "http://127.0.0.1:8545"
+)
 
 w3 = Web3(
     Web3.HTTPProvider(GANACHE_URL)
