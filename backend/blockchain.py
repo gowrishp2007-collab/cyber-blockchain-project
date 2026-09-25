@@ -2,7 +2,7 @@ import hashlib
 import os
 from pathlib import Path
 
-from solcx import compile_source, set_solc_version
+from solcx import compile_source, get_installed_solc_versions, install_solc, set_solc_version
 from web3 import Web3
 
 
@@ -43,7 +43,12 @@ def generate_evidence_hash(evidence: str) -> str:
 # ============================================================
 
 def compile_contract():
-    set_solc_version("0.8.20")
+    solc_version = "0.8.20"
+
+    if not any(str(version) == solc_version for version in get_installed_solc_versions()):
+        install_solc(solc_version)
+
+    set_solc_version(solc_version)
 
     contract_path = (
         Path(__file__).resolve().parent.parent
